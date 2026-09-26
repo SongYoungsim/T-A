@@ -1,0 +1,118 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-app-sans);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * .6);
+  --radius-md: calc(var(--radius) * .8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+:root {
+  --background: oklch(.982 .006 253);
+  --foreground: oklch(.235 .025 259);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(.235 .025 259);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(.235 .025 259);
+  --primary: oklch(.455 .162 259);
+  --primary-foreground: oklch(.985 0 0);
+  --secondary: oklch(.955 .018 252);
+  --secondary-foreground: oklch(.31 .04 259);
+  --muted: oklch(.955 .012 253);
+  --muted-foreground: oklch(.5 .035 259);
+  --accent: oklch(.932 .034 251);
+  --accent-foreground: oklch(.32 .08 259);
+  --destructive: oklch(.577 .245 27.325);
+  --border: oklch(.91 .014 253);
+  --input: oklch(.91 .014 253);
+  --ring: oklch(.57 .15 259);
+  --chart-1: oklch(.55 .18 259);
+  --chart-2: oklch(.69 .15 165);
+  --chart-3: oklch(.72 .16 72);
+  --chart-4: oklch(.64 .18 25);
+  --chart-5: oklch(.58 .14 305);
+  --radius: .75rem;
+  --sidebar: oklch(.225 .035 259);
+  --sidebar-foreground: oklch(.94 .01 253);
+  --sidebar-primary: oklch(.72 .12 247);
+  --sidebar-primary-foreground: oklch(.18 .03 259);
+  --sidebar-accent: oklch(.31 .05 259);
+  --sidebar-accent-foreground: oklch(.98 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(.68 .13 250);
+}
+
+.dark {
+  --background: oklch(.16 .02 259);
+  --foreground: oklch(.96 .01 253);
+  --card: oklch(.205 .025 259);
+  --card-foreground: oklch(.96 .01 253);
+  --popover: oklch(.205 .025 259);
+  --popover-foreground: oklch(.96 .01 253);
+  --primary: oklch(.7 .14 251);
+  --primary-foreground: oklch(.16 .025 259);
+  --secondary: oklch(.27 .03 259);
+  --secondary-foreground: oklch(.96 .01 253);
+  --muted: oklch(.27 .03 259);
+  --muted-foreground: oklch(.72 .025 253);
+  --accent: oklch(.3 .055 259);
+  --accent-foreground: oklch(.96 .01 253);
+  --destructive: oklch(.704 .191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(.62 .12 251);
+  --sidebar: oklch(.18 .025 259);
+  --sidebar-foreground: oklch(.96 .01 253);
+  --sidebar-primary: oklch(.7 .14 251);
+  --sidebar-primary-foreground: oklch(.16 .025 259);
+  --sidebar-accent: oklch(.28 .045 259);
+  --sidebar-accent-foreground: oklch(.98 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(.62 .12 251);
+}
+
+@layer base {
+  * { @apply border-border outline-ring/50; }
+  html { @apply font-sans; }
+  body { @apply bg-background text-foreground; min-height: 100vh; }
+}
+
+::selection { background: color-mix(in oklab, var(--primary) 24%, transparent); }
