@@ -1,4 +1,5 @@
-const DEFAULT_ITERATIONS = 310_000;
+// Cloudflare Workers WebCrypto currently caps PBKDF2 at 100,000 iterations.
+const DEFAULT_ITERATIONS = 100_000;
 const SALT_BYTES = 16;
 const KEY_BITS = 256;
 
