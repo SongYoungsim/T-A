@@ -163,7 +163,7 @@ export function EmployeeManager({
 
       <Card className="border-0 shadow-sm">
         <CardContent className="p-4 md:p-5">
-          <div className="grid gap-3 md:grid-cols-[minmax(220px,1fr)_repeat(3,minmax(130px,auto))]">
+          <div className="grid gap-3 lg:grid-cols-[minmax(220px,1fr)_repeat(3,minmax(130px,auto))]">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="사번 또는 성명 검색" className="h-10 pl-9" />
