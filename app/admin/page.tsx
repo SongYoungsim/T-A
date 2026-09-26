@@ -2,6 +2,7 @@ import { AlertTriangle, CalendarOff, Clock3, TimerReset, TrendingUp, UserCheck, 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { getCurrentUser } from '@/lib/auth';
 
 const kpis = [
   { label: '전체 재직인원', value: '30', unit: '명', note: '전월과 동일', icon: Users, tone: 'blue' },
@@ -26,11 +27,12 @@ const toneMap: Record<string, string> = {
   red: 'bg-rose-50 text-rose-700', cyan: 'bg-cyan-50 text-cyan-700',
 };
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+  const currentUser = await getCurrentUser();
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-        <div><p className="text-sm font-medium text-primary">오늘의 근태</p><h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">안녕하세요, 김서현님</h1><p className="mt-2 text-sm text-muted-foreground">직원 30명의 오늘 근태 현황을 한눈에 확인하세요.</p></div>
+        <div><p className="text-sm font-medium text-primary">오늘의 근태</p><h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">안녕하세요, {currentUser?.fullName ?? '관리자'}님</h1><p className="mt-2 text-sm text-muted-foreground">직원 30명의 오늘 근태 현황을 한눈에 확인하세요.</p></div>
         <div className="flex items-center gap-2 text-sm text-emerald-700"><span className="size-2 rounded-full bg-emerald-500" />데이터 기준 10:24</div>
       </div>
 

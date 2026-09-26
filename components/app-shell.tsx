@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   CalendarCheck2, CalendarClock, CalendarCog, CalendarDays, Clock3,
-  House, LayoutDashboard, LogOut, Settings2, TimerReset, Users,
+  House, LayoutDashboard, Settings2, TimerReset, Users,
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +14,9 @@ import {
   SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
   SidebarProvider, SidebarTrigger,
 } from '@/components/ui/sidebar';
+import { LogoutButton } from '@/components/logout-button';
 import { navigationByRole, type AppRole } from '@/lib/access-control';
+import type { CurrentUser } from '@/lib/hr-types';
 
 const icons = {
   CalendarCheck2, CalendarClock, CalendarCog, CalendarDays, Clock3,
@@ -23,16 +25,20 @@ const icons = {
 
 export function AppShell({
   role,
+  user,
   children,
 }: {
   role: AppRole;
+  user: CurrentUser;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
   const nav = navigationByRole[role];
-  const person = role === 'ADMIN'
-    ? { name: '김서현', meta: '인사팀 · 관리자', initials: '김서' }
-    : { name: '박민준', meta: '서비스개발팀 · 선임', initials: '박민' };
+  const initials = user.fullName.slice(0, 2);
+  const today = new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    dateStyle: 'full',
+  }).format(new Date());
 
   return (
     <SidebarProvider>
@@ -76,15 +82,13 @@ export function AppShell({
         <SidebarFooter className="p-3">
           <div className="flex items-center gap-3 rounded-xl bg-white/7 p-2 group-data-[collapsible=icon]:p-1">
             <Avatar className="size-9 border border-white/10">
-              <AvatarFallback className="bg-blue-300 text-xs font-bold text-slate-900">{person.initials}</AvatarFallback>
+              <AvatarFallback className="bg-blue-300 text-xs font-bold text-slate-900">{initials}</AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-              <p className="truncate text-sm font-semibold text-white">{person.name}</p>
-              <p className="truncate text-xs text-white/55">{person.meta}</p>
+              <p className="truncate text-sm font-semibold text-white">{user.fullName}</p>
+              <p className="truncate text-xs text-white/55">{user.department} · {user.jobTitle}</p>
             </div>
-            <Link href="/" aria-label="로그아웃" className="text-white/45 hover:text-white group-data-[collapsible=icon]:hidden">
-              <LogOut className="size-4" />
-            </Link>
+            <span className="group-data-[collapsible=icon]:hidden"><LogoutButton compact /></span>
           </div>
         </SidebarFooter>
       </Sidebar>
@@ -95,12 +99,13 @@ export function AppShell({
             <SidebarTrigger className="-ml-1" />
             <div>
               <p className="text-sm font-semibold">{role === 'ADMIN' ? '관리자 업무공간' : '나의 근태'}</p>
-              <p className="hidden text-xs text-muted-foreground sm:block">2026년 9월 26일 토요일</p>
+              <p className="hidden text-xs text-muted-foreground sm:block">{today}</p>
             </div>
           </div>
-          <Badge variant="secondary" className="rounded-full px-3 py-1">
-            {role === 'ADMIN' ? 'ADMIN' : 'USER'}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="rounded-full px-3 py-1">{role}</Badge>
+            <LogoutButton />
+          </div>
         </header>
 
         <main className="mx-auto w-full max-w-[1500px] flex-1 px-4 pb-24 pt-6 md:px-7 md:pb-10">

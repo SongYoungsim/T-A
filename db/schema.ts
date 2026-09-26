@@ -12,7 +12,7 @@ export const employees = sqliteTable('employees', {
   department: text('department').notNull(),
   jobTitle: text('job_title').notNull(),
   hiredOn: text('hired_on').notNull(),
-  employmentStatus: text('employment_status', { enum: ['ACTIVE', 'ON_LEAVE', 'TERMINATED'] }).notNull().default('ACTIVE'),
+  employmentStatus: text('employment_status', { enum: ['ACTIVE', 'LEAVE', 'RESIGNED'] }).notNull().default('ACTIVE'),
   role: text('role', { enum: ['ADMIN', 'USER'] }).notNull().default('USER'),
   standardStartMinute: integer('standard_start_minute').notNull().default(540),
   standardEndMinute: integer('standard_end_minute').notNull().default(1080),

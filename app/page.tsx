@@ -1,13 +1,16 @@
 import Image from 'next/image';
-import Link from 'next/link';
-import { ArrowRight, Building2, LockKeyhole, ShieldCheck } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+import { redirect } from 'next/navigation';
+import { Building2, ShieldCheck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { LoginForm } from '@/components/login-form';
+import { getCurrentUser } from '@/lib/auth';
 
-export default function LoginPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function LoginPage() {
+  const user = await getCurrentUser();
+  if (user) redirect(user.role === 'ADMIN' ? '/admin' : '/user');
+
   return (
     <main className="grid min-h-svh lg:grid-cols-[1.05fr_.95fr]">
       <section className="relative hidden overflow-hidden bg-[#17253d] p-12 text-white lg:flex lg:flex-col lg:justify-between">
@@ -31,27 +34,8 @@ export default function LoginPage() {
             <CardDescription className="text-[15px]">사번과 비밀번호로 로그인해 주세요.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
-            <form className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="employee-id">사번</Label>
-                <Input id="employee-id" name="employeeId" placeholder="사번을 입력하세요" className="h-12 bg-white" autoComplete="username" />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between"><Label htmlFor="password">비밀번호</Label><span className="text-xs text-muted-foreground">8자 이상</span></div>
-                <Input id="password" name="password" type="password" placeholder="비밀번호를 입력하세요" className="h-12 bg-white" autoComplete="current-password" />
-              </div>
-              <Button className="h-12 w-full text-[15px]" disabled>
-                <LockKeyhole className="size-4" />로그인
-              </Button>
-            </form>
-            <Alert className="bg-blue-50 text-blue-950">
-              <AlertDescription className="text-xs leading-5">1차에서는 로그인 화면과 보안 구조를 구축했습니다. 계정 생성·비밀번호 검증 연결은 사원 마스터 단계에서 활성화됩니다.</AlertDescription>
-            </Alert>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <Button variant="outline" render={<Link href="/admin" />} className="h-11 justify-between">관리자 화면 <ArrowRight className="size-4" /></Button>
-              <Button variant="outline" render={<Link href="/user" />} className="h-11 justify-between">직원 화면 <ArrowRight className="size-4" /></Button>
-            </div>
-            <p className="text-center text-xs text-muted-foreground">화면 미리보기 · 실제 계정 로그인은 다음 단계에서 연결</p>
+            <LoginForm />
+            <p className="text-center text-xs text-muted-foreground">인증된 계정만 사내 근태 데이터에 접근할 수 있습니다.</p>
           </CardContent>
         </Card>
       </section>

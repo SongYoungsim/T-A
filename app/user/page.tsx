@@ -3,11 +3,13 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getCurrentUser } from '@/lib/auth';
 
-export default function UserDashboard() {
+export default async function UserDashboard() {
+  const currentUser = await getCurrentUser();
   return (
     <div className="mx-auto max-w-4xl space-y-5">
-      <div><p className="text-sm font-medium text-primary">오늘도 좋은 하루 보내세요</p><h1 className="mt-1 text-2xl font-bold tracking-tight">박민준님의 근태</h1></div>
+      <div><p className="text-sm font-medium text-primary">오늘도 좋은 하루 보내세요</p><h1 className="mt-1 text-2xl font-bold tracking-tight">{currentUser?.fullName ?? '직원'}님의 근태</h1></div>
       <Card className="overflow-hidden border-0 bg-[#1e3353] text-white shadow-lg">
         <CardContent className="p-5 sm:p-7">
           <div className="flex items-start justify-between"><div><p className="text-sm text-blue-100">2026년 9월 26일 토요일</p><h2 className="mt-2 text-2xl font-bold">오늘은 휴일입니다</h2></div><Badge className="bg-white/12 text-white hover:bg-white/12">휴일</Badge></div>
