@@ -1,0 +1,36 @@
+    #:schema node_modules/wrangler/config-schema.json
+    name = "hr-attendance-app"
+    main = "dist/server/index.js"
+    compatibility_date = "2026-05-15"
+    compatibility_flags = ["nodejs_compat"]
+
+    [assets]
+    directory = "./dist/client"
+
+    # ─── 1. 기본 / 개발 환경 (Development) ─────────────────────────────────────────
+    # 로컬 개발 및 DEV Worker 배포 시 사용됩니다.
+    # 바인딩 이름은 일관되게 'DB'를 유지합니다.
+    [vars]
+    APP_ENV = "development"
+
+    [[d1_databases]]
+    binding = "DB"
+    database_name = "hr-attendance-dev"
+    database_id = "00000000-0000-4000-8000-000000000000"
+
+    # ─── 2. 운영 환경 (Production) ────────────────────────────────────────────────
+    # 실제 운영 배포: wrangler deploy --env production
+    # 운영 배포 시 PROD D1 Database ID를 연결합니다.
+    # DEV와 PROD는 절대로 동일한 Database ID를 공유하지 않습니다.
+    [env.production]
+    name = "hr-attendance-app-prod"
+
+    [env.production.vars]
+    APP_ENV = "production"
+
+    [[env.production.d1_databases]]
+    binding = "DB"
+    database_name = "hr-attendance-prod"
+    # 회사 계정에서 wrangler d1 create hr-attendance-prod 실행 후 부여받은 UUID를 지정합니다.
+    database_id = "4d1599a9-c64f-4af3-83cf-a27a7559c47d"
+    migrations_dir = "drizzle"

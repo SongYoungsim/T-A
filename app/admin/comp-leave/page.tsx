@@ -1,12 +1,49 @@
-import { PagePlaceholder } from '@/components/page-placeholder';
+import { redirect } from 'next/navigation';
+import { getCurrentUser } from '@/lib/auth';
+import { listCompensatoryLeavesAdmin } from '@/lib/compensatory-leave';
+import { env } from 'cloudflare:workers';
+import { AdminCompLeaveView } from './admin-comp-leave-view';
 
-export default function CompLeavePage() {
+interface PageProps {
+  searchParams: Promise<{
+    department?: string;
+    search?: string;
+    status?: string;
+  }>;
+}
+
+export default async function AdminCompLeavePage({ searchParams }: PageProps) {
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'ADMIN') {
+    redirect('/login');
+  }
+
+  const resolved = await searchParams;
+  const department = resolved.department || 'ALL';
+  const search = resolved.search || '';
+  const statusFilter = (resolved.status as 'ALL' | 'AVAILABLE' | 'USED' | 'EXPIRED') || 'ALL';
+
+  // 1. 부서 목록 조회
+  const deptRows = await env.DB.prepare(
+    `SELECT DISTINCT department FROM employees WHERE employment_status <> 'RESIGNED' ORDER BY department ASC`
+  ).all<{ department: string }>();
+  const departments = deptRows.results.map((r) => r.department);
+
+  // 2. 대체휴무 목록 및 집계 조회
+  const { rows, summary } = await listCompensatoryLeavesAdmin({
+    department,
+    search,
+    statusFilter,
+  });
+
   return (
-    <PagePlaceholder
-      title="대체휴무"
-      description="휴일근무에서 발생한 대체휴무의 부여·사용·만료를 추적합니다."
-      phase="Phase 7"
-      bullets={["원본 휴일근무 추적","3개월 만료 상태 관리","관리자 직접 사용 대상 선택"]}
+    <AdminCompLeaveView
+      initialRows={rows}
+      initialSummary={summary}
+      departments={departments}
+      initialDepartment={department}
+      initialSearch={search}
+      initialStatus={statusFilter}
     />
   );
 }

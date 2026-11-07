@@ -365,7 +365,7 @@ function EmployeeDialog({
           <div className="grid min-h-64 place-items-center"><LoaderCircle className="size-6 animate-spin text-primary" /></div>
         ) : (
           <>
-            <form className="space-y-5" onSubmit={save}>
+            <form className="space-y-5" onSubmit={save} autoComplete="off">
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="사번" name="employeeNumber" defaultValue={employee?.employeeNumber} disabled={Boolean(employee)} />
                 <Field label="성명" name="fullName" defaultValue={employee?.fullName} />
@@ -402,7 +402,7 @@ function EmployeeDialog({
 
               <div className="flex justify-end gap-2 border-t pt-4">
                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>취소</Button>
-                <Button disabled={pending}>{pending && <LoaderCircle className="size-4 animate-spin" />}{employee ? '변경사항 저장' : '직원 등록'}</Button>
+                <Button type="submit" disabled={pending}>{pending && <LoaderCircle className="size-4 animate-spin" />}{employee ? '변경사항 저장' : '직원 등록'}</Button>
               </div>
             </form>
 

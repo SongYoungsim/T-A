@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import {
   CalendarCheck2, CalendarClock, CalendarCog, CalendarDays, Clock3,
   House, LayoutDashboard, Settings2, TimerReset, Users,
+  FileBarChart2, ShieldCheck,
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +22,7 @@ import type { CurrentUser } from '@/lib/hr-types';
 const icons = {
   CalendarCheck2, CalendarClock, CalendarCog, CalendarDays, Clock3,
   House, LayoutDashboard, Settings2, TimerReset, Users,
+  FileBarChart2, ShieldCheck,
 };
 
 export function AppShell({
@@ -44,7 +46,7 @@ export function AppShell({
     <SidebarProvider>
       <Sidebar collapsible="icon" className="border-r-0">
         <SidebarHeader className="p-4">
-          <Link href={role === 'ADMIN' ? '/admin' : '/user'} className="flex items-center gap-3 overflow-hidden">
+          <a href={role === 'ADMIN' ? '/admin' : '/user'} className="flex items-center gap-3 overflow-hidden">
             <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white">
               <Image src="/logo_icon.png" width={25} height={25} alt="T&A" />
             </span>
@@ -52,7 +54,7 @@ export function AppShell({
               <span className="block truncate text-sm font-bold tracking-tight text-white">T&A HR</span>
               <span className="block truncate text-xs text-white/55">근태관리 시스템</span>
             </span>
-          </Link>
+          </a>
         </SidebarHeader>
         <SidebarContent className="px-2 pt-4">
           <SidebarGroup>
@@ -64,7 +66,7 @@ export function AppShell({
                   return (
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton
-                        render={<Link href={item.href} />}
+                        render={<a href={item.href} />}
                         isActive={active}
                         tooltip={item.label}
                         className="h-11 rounded-xl px-3 data-active:bg-white/12 data-active:text-white"
@@ -103,6 +105,11 @@ export function AppShell({
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {role === 'ADMIN' && process.env.NODE_ENV !== 'production' && (
+              <Badge variant="outline" className="border-amber-400 bg-amber-50 text-amber-800 text-[10px] font-bold tracking-wide hidden sm:inline-flex">
+                DEVELOPMENT
+              </Badge>
+            )}
             <Badge variant="secondary" className="rounded-full px-3 py-1">{role}</Badge>
             <LogoutButton />
           </div>

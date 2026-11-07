@@ -15,6 +15,8 @@ export const navigationByRole: Record<AppRole, NavigationItem[]> = {
     { label: '대체휴무', href: '/admin/comp-leave', icon: 'CalendarCheck2' },
     { label: '사원관리', href: '/admin/employees', icon: 'Users' },
     { label: '근무일 캘린더', href: '/admin/work-calendar', icon: 'CalendarCog' },
+    { label: '리포트', href: '/admin/reports', icon: 'FileBarChart2' },
+    { label: '감사로그', href: '/admin/audit-logs', icon: 'ShieldCheck' },
     { label: '설정', href: '/admin/settings', icon: 'Settings2' },
   ],
   USER: [

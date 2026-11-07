@@ -1,12 +1,24 @@
-import { PagePlaceholder } from '@/components/page-placeholder';
+import { redirect } from 'next/navigation';
+import { getCurrentUser } from '@/lib/auth';
+import { getUserCompensatoryLeaves } from '@/lib/compensatory-leave';
+import { UserCompLeaveView } from './user-comp-leave-view';
 
-export default function CompLeavePage() {
+export default async function UserCompLeavePage() {
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect('/login');
+  }
+
+  // 항상 세션에서 추출한 본인 ID만 사용 (보안 통제)
+  const employeeId = user.employeeId;
+  const { rows, summary, expiringSoonList } = await getUserCompensatoryLeaves(employeeId);
+
   return (
-    <PagePlaceholder
-      title="내 대체휴무"
-      description="사용 가능한 대체휴무와 만료 예정 내역을 확인합니다."
-      phase="Phase 7"
-      bullets={["AVAILABLE·USED·EXPIRED 구분","발행 근거 휴일근무 확인","만료 30일 전 알림"]}
+    <UserCompLeaveView
+      rows={rows}
+      summary={summary}
+      expiringSoonList={expiringSoonList}
+      employeeName={user.fullName}
     />
   );
 }

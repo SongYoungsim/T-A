@@ -1,45 +1,163 @@
-import { Bell, CalendarDays, Clock3, LogIn, LogOut, TimerReset } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { CalendarCheck2, CalendarDays, Clock3, TimerReset } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { getCurrentUser } from '@/lib/auth';
+import { getUserLeaveSummary } from '@/lib/leave';
+import { getRecentAttendance } from '@/lib/attendance';
+import { getUserCurrentMonthOvertimeMinutes } from '@/lib/overtime';
+import { getUserCompensatoryLeaves } from '@/lib/compensatory-leave';
+import { AttendanceCard } from '@/components/attendance-card';
+import {
+  ATTENDANCE_STATUS_LABEL,
+  LEAVE_TYPE_META,
+  formatTimeKST,
+  minuteToTimeString,
+  formatDuration,
+} from '@/lib/hr-types';
 
 export default async function UserDashboard() {
   const currentUser = await getCurrentUser();
+
+  const now = new Date();
+  const currentYear = parseInt(
+    new Intl.DateTimeFormat('en', { year: 'numeric', timeZone: 'Asia/Seoul' }).format(now),
+    10,
+  );
+  const currentMonth = parseInt(
+    new Intl.DateTimeFormat('en', { month: 'numeric', timeZone: 'Asia/Seoul' }).format(now),
+    10,
+  );
+
+  const [leaveSummary, recentDays, overtimeStats, compLeaveData] = await Promise.all([
+    currentUser ? getUserLeaveSummary(currentUser.employeeId, currentYear) : null,
+    currentUser ? getRecentAttendance(currentUser.employeeId, 5) : [],
+    currentUser
+      ? getUserCurrentMonthOvertimeMinutes(currentUser.employeeId, currentYear, currentMonth)
+      : { overtimeMinutes: 0, holidayWorkMinutes: 0, totalMinutes: 0, overtimeCount: 0, holidayWorkCount: 0, compLeaveGrantedCount: 0 },
+    currentUser ? getUserCompensatoryLeaves(currentUser.employeeId) : null,
+  ]);
+
+  const totalMinutes = leaveSummary
+    ? leaveSummary.grantedMinutes + leaveSummary.carriedMinutes
+    : 0;
+  const remainMinutes = leaveSummary ? totalMinutes - leaveSummary.usedMinutes : 0;
+  const remainDays = remainMinutes / 480;
+
+  const remainLabel = leaveSummary?.masterId
+    ? `${remainDays.toFixed(3).replace(/\.?0+$/, '')}일`
+    : '미설정';
+  const remainSub = leaveSummary?.masterId
+    ? `${(remainMinutes / 60).toFixed(1)}시간`
+    : '관리자 문의';
+
+  const stdStart = currentUser
+    ? minuteToTimeString(currentUser.standardStartMinute ?? 540)
+    : '09:00';
+  const stdEnd = currentUser
+    ? minuteToTimeString(currentUser.standardEndMinute ?? 1080)
+    : '18:00';
+
+  const overtimeValue =
+    overtimeStats && overtimeStats.totalMinutes > 0
+      ? formatDuration(overtimeStats.totalMinutes)
+      : '0분';
+  const overtimeSub =
+    overtimeStats && overtimeStats.totalMinutes > 0
+      ? `평일 ${formatDuration(overtimeStats.overtimeMinutes)} · 휴일 ${formatDuration(overtimeStats.holidayWorkMinutes)}`
+      : '추가근무 없음';
+
+  const compAvailableDays = compLeaveData?.summary.availableDays ?? 0;
+  const compExpiringDays = compLeaveData?.summary.expiringSoonDays ?? 0;
+
   return (
     <div className="mx-auto max-w-4xl space-y-5">
-      <div><p className="text-sm font-medium text-primary">오늘도 좋은 하루 보내세요</p><h1 className="mt-1 text-2xl font-bold tracking-tight">{currentUser?.fullName ?? '직원'}님의 근태</h1></div>
-      <Card className="overflow-hidden border-0 bg-[#1e3353] text-white shadow-lg">
-        <CardContent className="p-5 sm:p-7">
-          <div className="flex items-start justify-between"><div><p className="text-sm text-blue-100">2026년 9월 26일 토요일</p><h2 className="mt-2 text-2xl font-bold">오늘은 휴일입니다</h2></div><Badge className="bg-white/12 text-white hover:bg-white/12">휴일</Badge></div>
-          <div className="mt-7 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-white/8 p-4"><p className="text-xs text-slate-300">출근시간</p><p className="mt-1 text-xl font-bold">--:--</p></div>
-            <div className="rounded-2xl bg-white/8 p-4"><p className="text-xs text-slate-300">퇴근시간</p><p className="mt-1 text-xl font-bold">--:--</p></div>
-          </div>
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <Button disabled className="h-16 bg-blue-500 text-base text-white disabled:opacity-45"><LogIn className="size-5" />출근</Button>
-            <Button disabled variant="secondary" className="h-16 text-base disabled:opacity-45"><LogOut className="size-5" />퇴근</Button>
-          </div>
-          <p className="mt-3 text-center text-xs text-slate-400">휴일에는 출퇴근 버튼을 사용할 수 없습니다.</p>
-        </CardContent>
-      </Card>
+      <div>
+        <p className="text-sm font-medium text-primary">오늘도 좋은 하루 보내세요</p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight">
+          {currentUser?.fullName ?? '직원'}님의 근태
+        </h1>
+      </div>
 
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      {/* 출퇴근 카드 (실제 API 연동) */}
+      <AttendanceCard
+        employeeName={currentUser?.fullName ?? '직원'}
+        standardStartMinute={currentUser?.standardStartMinute ?? 540}
+        standardEndMinute={currentUser?.standardEndMinute ?? 1080}
+      />
+
+      {/* 요약 카드 4종 (연차 잔여, 대체휴무 잔여, 기준 출퇴근, 이번달 추가근무) */}
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          { label: '잔여 연차', value: '10.125일', sub: '81시간', icon: CalendarDays },
-          { label: '대체휴무', value: '2일', sub: '사용 가능', icon: Clock3 },
-          { label: '이번 달 연장', value: '6시간 30분', sub: '3건', icon: TimerReset },
+          { label: '잔여 연차', value: remainLabel, sub: remainSub, icon: CalendarDays },
+          {
+            label: '대체휴무 잔여',
+            value: `${compAvailableDays}일`,
+            sub: compExpiringDays > 0 ? `30일내 만료 ${compExpiringDays}일` : '연차와 분리 보관',
+            icon: CalendarCheck2,
+          },
+          { label: '기준 출근', value: stdStart, sub: `기준 퇴근 ${stdEnd}`, icon: Clock3 },
+          { label: '이번 달 추가근무', value: overtimeValue, sub: overtimeSub, icon: TimerReset },
         ].map(({ label, value, sub, icon: Icon }) => (
-          <Card key={label} className="border-0 shadow-sm last:col-span-2 sm:last:col-span-1"><CardContent className="p-4 sm:p-5"><Icon className="size-5 text-primary" /><p className="mt-5 text-sm text-muted-foreground">{label}</p><p className="mt-1 text-xl font-bold">{value}</p><p className="mt-1 text-xs text-muted-foreground">{sub}</p></CardContent></Card>
+          <Card key={label} className="border-0 shadow-sm">
+            <CardContent className="p-4 sm:p-5">
+              <Icon className="size-5 text-primary" />
+              <p className="mt-4 text-xs sm:text-sm text-muted-foreground">{label}</p>
+              <p className="mt-1 text-lg sm:text-xl font-bold">{value}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
+            </CardContent>
+          </Card>
         ))}
       </section>
 
-      <Alert className="border-amber-200 bg-amber-50">
-        <Bell className="size-4 text-amber-700" /><AlertTitle className="text-amber-950">대체휴무 만료 예정</AlertTitle><AlertDescription className="text-amber-900">대체휴무 1일이 2026-10-18에 만료될 예정입니다.</AlertDescription>
-      </Alert>
+      {/* 최근 근태 (실제 데이터) */}
+      <Card className="border-0 shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-base">최근 근태</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-1">
+          {recentDays.length === 0 ? (
+            <p className="py-4 text-center text-sm text-muted-foreground">근태 기록이 없습니다.</p>
+          ) : (
+            recentDays.map((d) => {
+              // 표시용 상태
+              const status = d.leaveType
+                ? LEAVE_TYPE_META[d.leaveType].label
+                : d.representativeStatus
+                ? ATTENDANCE_STATUS_LABEL[d.representativeStatus]
+                : '미출근';
 
-      <Card className="border-0 shadow-sm"><CardHeader><CardTitle className="text-base">최근 근태</CardTitle></CardHeader><CardContent className="space-y-1">{[['09.25', '정상', '08:54 · 18:12'], ['09.24', '연장', '08:57 · 20:05'], ['09.23', '반차', '13:02 · 18:04']].map(([date,status,time]) => <div key={date} className="flex items-center justify-between border-b py-3 last:border-0"><div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-xl bg-muted text-sm font-semibold">{date}</span><Badge variant="outline">{status}</Badge></div><span className="text-sm text-muted-foreground">{time}</span></div>)}</CardContent></Card>
+              const timeStr = d.checkInAt
+                ? `${formatTimeKST(d.checkInAt)}${d.checkOutAt ? ' · ' + formatTimeKST(d.checkOutAt) : ''}`
+                : d.leaveType
+                ? LEAVE_TYPE_META[d.leaveType].label
+                : '-';
+
+              const badgeVariant =
+                d.representativeStatus === 'LATE' ? 'destructive'
+                : d.representativeStatus === 'OVERTIME' ? 'default'
+                : d.leaveType ? 'secondary'
+                : 'outline';
+
+              return (
+                <div key={d.date} className="flex items-center justify-between border-b py-3 last:border-0">
+                  <div className="flex items-center gap-3">
+                    <span className="grid size-10 place-items-center rounded-xl bg-muted text-sm font-semibold">
+                      {d.date.slice(5).replace('-', '.')}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <Badge variant={badgeVariant}>{status}</Badge>
+                      {d.isLate && d.isEarlyLeave && (
+                        <Badge variant="outline" className="text-xs">조퇴</Badge>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-sm text-muted-foreground tabular-nums">{timeStr}</span>
+                </div>
+              );
+            })
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

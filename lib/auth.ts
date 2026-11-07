@@ -85,7 +85,9 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
        e.department,
        e.job_title AS jobTitle,
        e.employment_status AS employmentStatus,
-       e.role
+       e.role,
+       e.standard_start_minute AS standardStartMinute,
+       e.standard_end_minute AS standardEndMinute
      FROM auth_sessions s
      JOIN user_accounts ua ON ua.id = s.account_id
      JOIN employees e ON e.id = ua.employee_id

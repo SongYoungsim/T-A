@@ -74,7 +74,7 @@ export function LoginForm() {
           {error}
         </p>
       )}
-      <Button className="h-12 w-full text-[15px]" disabled={pending}>
+      <Button type="submit" className="h-12 w-full text-[15px]" disabled={pending}>
         {pending ? <LoaderCircle className="size-4 animate-spin" /> : <LockKeyhole className="size-4" />}
         {pending ? '확인 중...' : '로그인'}
       </Button>
